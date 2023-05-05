@@ -24,7 +24,7 @@ WHY?
 /* EXEC vs. sp_executesql */
 
 DECLARE @SQL nvarchar(max)
-SELECT @SQL = 'SELECT ''initial test'''
+SELECT @SQL = N'SELECT ''initial test'''
 
 EXEC (@SQL)
 EXEC sys.sp_executesql @SQL
@@ -37,7 +37,7 @@ GO
 -- now let's get some execution plans
 
 DECLARE @SQL nvarchar(max)
-SELECT @SQL = 'SELECT TOP 10 * FROM Inventory'
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory'
 
 EXEC (@SQL)
 
@@ -56,7 +56,7 @@ DECLARE @SQL nvarchar(max),
 -- One option for writing this using EXEC 
 --EXEC ('SELECT top 10 * FROM ' + @table)
 
-SELECT @SQL = 'SELECT TOP 10 * FROM ' + @table
+SELECT @SQL = N'SELECT TOP 10 * FROM ' + @table
 
 EXEC (@SQL)
 
@@ -71,24 +71,9 @@ GO
 
 DECLARE @SQL nvarchar(max),
 	@Table sysname = 'Inventory; SELECT ''NYC, We have a problem.'''
-
--- This won't run. Don't bother....
--- SELECT top 10 * FROM @Table
-
-SELECT @SQL = 'SELECT TOP 10 * FROM ' + @table
-
-EXEC (@SQL)
-
-EXEC sp_executesql @SQL
-GO
-
-
--- use quotename for objects!!!
-DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory; SELECT ''NYC, We have a problem.'''
 	
-SELECT @SQL = 'SELECT TOP 10 * FROM ' + quotename(@table)
-PRINT @SQL
+SELECT @SQL = N'SELECT TOP 10 * FROM ' + @table
+SELECT @SQL
 
 EXEC (@SQL)
 
@@ -102,7 +87,7 @@ DECLARE @SQL nvarchar(max),
 	@Table sysname = 'Inventory] ; SELECT ''NYC, We have a problem.'' as [I can still do this:'
 
 
-SELECT @SQL = 'SELECT TOP 10 * FROM [' + @table + ']'
+SELECT @SQL = N'SELECT TOP 10 * FROM [' + @table + ']'
 PRINT @SQL
 
 EXEC (@SQL)
@@ -113,9 +98,9 @@ GO
 
 -- use quotename for objects!!!
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory] SELECT ''NYC, We have a problem.'' as [I can still do this:'
+	@Table sysname = 'Inventory]; SELECT ''NYC, We have a problem.'' as [I can still do this:;'
 
-SELECT @SQL = 'SELECT TOP 10 * FROM ' + QUOTENAME(@table)
+SELECT @SQL = N'SELECT TOP 10 * FROM ' + QUOTENAME(@table)
 PRINT @SQL
 
 EXEC (@SQL)
@@ -133,7 +118,7 @@ SELECT @@SPID as SpidFromBatch
 DECLARE @SQL nvarchar(max) = 'SELECT @@SPID as SpidFromDynamicSQL'
 EXEC sys.sp_executesql @SQL
 
-SELECT @SQL = 'SELECT @@SPID as SpidFromDynamicSQLEXEC'
+SELECT @SQL = N'SELECT @@SPID as SpidFromDynamicSQLEXEC'
 EXEC (@SQL)
 
 EXEC master..xp_cmdshell 'sqlcmd -S"localhost" -Q"SELECT @@SPID as SpidFromSQLCmd"'
@@ -150,10 +135,11 @@ CREATE TABLE #Test
 	(ID int IDENTITY(1,1),
 	SampleValue varchar(50))
 
+
 /* How I usually think of doing the statements */
 DECLARE @Sql nvarchar(100)
 
-SELECT @Sql = 'SELECT ''TestValue from standalone dynamic statement'' as TestValue'
+SELECT @SQL = N'SELECT ''TestValue from standalone dynamic statement'' as TestValue'
 
 INSERT INTO #Test (SampleValue)
 EXEC sp_executesql @Sql
@@ -164,7 +150,7 @@ GO
 /* How I can think of doing the statements */
 DECLARE @Sql nvarchar(100)
 
-SELECT @Sql = '
+SELECT @SQL = N'
 INSERT INTO #Test (SampleValue)
 SELECT ''TestValue from combined dynamic statement'' as TestValue'
 
@@ -181,18 +167,20 @@ DECLARE @SQL nvarchar(max),
 	@BaseModelID int = 58
 
 -- run just this part first
-SELECT @SQL = 'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID'
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID'
 EXEC (@SQL)
+
+SELECT @BaseModelID
 GO
 
 
 DECLARE @SQL nvarchar(max),
 	@BaseModelID int = 58
 
-SELECT @SQL = 'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
 EXEC (@SQL)
 
-SELECT @SQL = 'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID'
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID'
 EXEC sp_executesql @SQL, N'@BaseModelID int', @BaseModelID
 
 GO
@@ -204,12 +192,12 @@ DECLARE @SQL nvarchar(max),
 	@PackageID int = 4
 
 
-SELECT @SQL = 'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
 	 + ' AND PackageID = ' + convert(nvarchar(5), @PackageID)
 EXEC (@SQL)
 
 
-SELECT @SQL = 'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID AND PackageID = @PackageID'
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID AND PackageID = @PackageID'
 EXEC sp_executesql @SQL, N'@BaseModelID int, @PackageID int', @BaseModelID, @PackageID
 
 GO
@@ -221,14 +209,14 @@ DECLARE @SQL nvarchar(max),
 	@TotalCount int
 
 
-SELECT @SQL = 'SELECT @TotalCount = count(*) FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
+SELECT @SQL = N'SELECT @TotalCount = count(*) FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
 --EXEC (@SQL)
 
 -- has to be done as an INSERT
 -- SELECT @TotalCount = EXEC (@SQL)
 
 DECLARE @TotalCountTV TABLE (TotalCount INT)
-SELECT @SQL = 'SELECT count(*) FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
+SELECT @SQL = N'SELECT count(*) FROM Inventory WHERE BaseModelID = ' + convert(nvarchar(5), @BaseModelID)
 
 INSERT INTO @TotalCountTV
 EXEC (@SQL)
@@ -241,7 +229,7 @@ DECLARE @SQL nvarchar(max),
 	@BaseModelID int = 58,
 	@TotalCount int
 
-SELECT @SQL = 'SELECT @TotalCount = count(*) FROM Inventory WHERE BaseModelID = @BaseModelID'
+SELECT @SQL = N'SELECT @TotalCount = count(*) FROM Inventory WHERE BaseModelID = @BaseModelID'
 EXEC sp_executesql @SQL, N'@BaseModelID int, @TotalCount int OUTPUT', @BaseModelID, @TotalCount OUTPUT
 
 SELECT @TotalCount

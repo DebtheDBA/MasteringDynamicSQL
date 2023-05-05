@@ -26,7 +26,7 @@ FETCH FIRST FROM table_cursor INTO @dbname
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	
-	SELECT @SQL = 'USE ' + quotename(@dbname) + '
+	SELECT @SQL = N'USE ' + quotename(@dbname) + '
 	SELECT TOP 10 db_id() as DatabaseID, db_name() as DatabaseName, * 
 	FROM INFORMATION_SCHEMA.TABLES'
 

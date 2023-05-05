@@ -6,7 +6,7 @@ GO
 /* OPENROWSET to a server that exists */
 DECLARE @SQL nvarchar(max)
 
-SELECT @SQL = 'SELECT 
+SELECT @SQL = N'SELECT 
 	a.*  
 FROM OPENROWSET(
     ''SQLNCLI11'', 
@@ -20,7 +20,7 @@ GO
 /* OPENROWSET to a server that doesn't exist */
 DECLARE @SQL nvarchar(max)
 
-SELECT @SQL = 'SELECT 
+SELECT @SQL = N'SELECT 
 	a.*  
 FROM OPENROWSET(
     ''SQLNCLI11'', 
@@ -35,7 +35,7 @@ GO
 DECLARE @SQL nvarchar(max)
 BEGIN TRY 
 
-SELECT @SQL = 'SELECT 
+SELECT @SQL = N'SELECT 
 	a.*  
 FROM OPENROWSET(
     ''SQLNCLI11'', 
@@ -58,7 +58,7 @@ CREATE TABLE #Person (Person_First_Name varchar(50), Person_Last_Name varchar(50
 
 DECLARE @SQL nvarchar(max)
 BEGIN TRY 
-	SELECT @SQL = 'SELECT 
+	SELECT @SQL = N'SELECT 
 		a.*  
 	FROM OPENROWSET(
 		''SQLNCLI11'', 
@@ -71,7 +71,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	
-	SELECT 'Cannot access Chihuahua'
+	SELECT 'Cannot access Chihuahua: ' + ERROR_MESSAGE()
 
 END CATCH
 GO
@@ -80,7 +80,7 @@ GO
 
 DECLARE @SQL nvarchar(max)
 BEGIN TRY 
-	SELECT @SQL = 'SELECT 
+	SELECT @SQL = N'SELECT 
 		a.*  
 	FROM OPENROWSET(
 		''SQLNCLI11'', 
@@ -88,6 +88,7 @@ BEGIN TRY
 		''SELECT First_Name, Last_Name FROM dbo.Persona Where Person_ID <= 11''
 	) AS a';  
 
+	INSERT INTO #Person
 	EXECUTE sp_executesql @SQL
 END TRY
 BEGIN CATCH
@@ -101,7 +102,7 @@ GO
 
 DECLARE @SQL nvarchar(max)
 BEGIN TRY 
-	SELECT @SQL = 'INSERT INTO #Person
+	SELECT @SQL = N'INSERT INTO #Person
 	SELECT 
 		a.*  
 	FROM OPENROWSET(
@@ -114,7 +115,7 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	
-	SELECT 'Cannot access Chihuahua' 
+	SELECT 'Error running statement: ' + ERROR_MESSAGE()
 
 END CATCH
 GO
@@ -138,7 +139,7 @@ WHILE @@FETCH_STATUS = 0
 BEGIN 
 
 	BEGIN TRY 
-		SELECT @SQL = 'INSERT INTO #Person
+		SELECT @SQL = N'INSERT INTO #Person
 		SELECT 
 			a.*  
 		FROM OPENROWSET(

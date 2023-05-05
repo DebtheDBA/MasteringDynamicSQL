@@ -43,7 +43,7 @@ EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
 	@TransactionDateMax = '2023-01-01';
 GO
 
--- Execute for everything
+-- Execute for everything. Run these in a different window 
 EXEC DynamicSQL.SearchAllSoldInventory
 GO
 

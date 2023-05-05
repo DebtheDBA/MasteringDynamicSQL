@@ -28,8 +28,8 @@ DECLARE @SQL nvarchar(max),
 SELECT @ParmDefinition = ' @MakeName varchar(50), @ModelName varchar(50), @ColorName varchar(50), @PackageName varchar(50), @InvoicePriceMin money, @InvoicePriceMax money, @MSRPMin money, @MSRPMax money, @SellPriceMin money, @SellPriceMax money, @DateReceivedMin date, @DateReceivedMax date, @TransactionDateMin datetime, @TransactionDateMax datetime'
 
 /* create the statement */
-SELECT @SQL = '/* SearchAllSoldInventory_DynamicNoDefaults */
-SELECT  
+SELECT @SQL = N'
+SELECT  /* SearchAllSoldInventory_DynamicNoDefaults */
 		I.VIN,
 		mk.MakeName,
 		ml.ModelName,

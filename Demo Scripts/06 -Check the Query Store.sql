@@ -18,7 +18,8 @@ FROM sys.query_store_query as qsq
 	JOIN sys.query_store_plan as qsp ON qsp.query_id = qsq.query_id 
 	JOIN sys.query_store_query_text as qst ON qsq.query_text_id = qst.query_text_id
 	LEFT JOIN sys.query_store_plan_feedback as qsf ON qsp.plan_id = qsf.plan_id
-where qst.query_sql_text LIKE '%Inventory%'
-and qst.query_sql_text NOT LIKE '%query_store%'
-ORDER BY qsq.last_execution_time desc
+WHERE qst.query_sql_text LIKE '%Inventory%'
+AND qst.query_sql_text NOT LIKE '%query_store%'
+AND qsq.last_execution_time > DATEADD(HOUR, -1, getdate())
+ORDER BY qsq.last_execution_time DESC
 
