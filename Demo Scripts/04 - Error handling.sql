@@ -4,7 +4,7 @@ GO
 /* Now let's look at connecting to other servers */
 
 /* OPENROWSET to a server that exists */
-DECLARE @SQL nvarchar(max)
+DECLARE @SQL NVARCHAR(MAX)
 
 SELECT @SQL = N'SELECT 
 	a.*  
@@ -35,20 +35,20 @@ GO
 DECLARE @SQL nvarchar(max)
 BEGIN TRY 
 
-SELECT @SQL = N'SELECT 
-	a.*  
-FROM OPENROWSET(
-    ''SQLNCLI11'', 
-    ''Server=chihuahua;database=Superheroes;uid=andy_local;pwd=andy_local'',
-    ''SELECT * FROM dbo.Person Where Person_ID <= 11''
-) AS a';  
+	SELECT @SQL = N'SELECT 
+		a.*  
+	FROM OPENROWSET(
+		''SQLNCLI11'', 
+		''Server=chihuahua;database=Superheroes;uid=andy_local;pwd=andy_local'',
+		''SELECT * FROM dbo.Person Where Person_ID <= 11''
+	) AS a';  
 
-EXECUTE sp_executesql @SQL
+	EXECUTE sp_executesql @SQL
 
 END TRY
 BEGIN CATCH
 	
-	SELECT 'Cannot access Chihuahua'
+	SELECT 'Cannot access Chihuahua' AS CaughtErrorMessage
 
 END CATCH
 GO
@@ -71,34 +71,13 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	
-	SELECT 'Cannot access Chihuahua: ' + ERROR_MESSAGE()
+	SELECT 'Cannot access Chihuahua: ' + ERROR_MESSAGE() AS CaughtErrorMessage
 
 END CATCH
 GO
 
---CREATE TABLE #Person (Person_First_Name varchar(50), Person_Last_Name varchar(50))
-
-DECLARE @SQL nvarchar(max)
-BEGIN TRY 
-	SELECT @SQL = N'SELECT 
-		a.*  
-	FROM OPENROWSET(
-		''SQLNCLI11'', 
-		''Server=localhost;database=Superheroes;uid=andy_local;pwd=andy_local'',
-		''SELECT First_Name, Last_Name FROM dbo.Persona Where Person_ID <= 11''
-	) AS a';  
-
-	INSERT INTO #Person
-	EXECUTE sp_executesql @SQL
-END TRY
-BEGIN CATCH
-	
-	SELECT ERROR_MESSAGE() as ErrorMessage
-
-END CATCH
-GO
-
---CREATE TABLE #Person (Person_First_Name varchar(50), Person_Last_Name varchar(50))
+/* add the insert to the dynamic sql */
+DROP TABLE IF EXISTS #Person
 
 DECLARE @SQL nvarchar(max)
 BEGIN TRY 
@@ -115,7 +94,30 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	
-	SELECT 'Error running statement: ' + ERROR_MESSAGE()
+	SELECT 'Error running statement: ' + ERROR_MESSAGE() AS CaughtErrorMessage
+
+END CATCH
+GO
+
+/* error when the database exists but the object doesn't */
+DECLARE @SQL nvarchar(max)
+--CREATE TABLE #Person (Person_First_Name varchar(50), Person_Last_Name varchar(50))
+
+BEGIN TRY 
+	SELECT @SQL = N'SELECT 
+		a.*  
+	FROM OPENROWSET(
+		''SQLNCLI11'', 
+		''Server=localhost;database=Superheroes;uid=andy_local;pwd=andy_local'',
+		''SELECT First_Name, Last_Name FROM dbo.Persona Where Person_ID <= 11''
+	) AS a';  
+
+	INSERT INTO #Person
+	EXECUTE sp_executesql @SQL
+END TRY
+BEGIN CATCH
+	
+	SELECT ERROR_MESSAGE() as CaughtErrorMessage
 
 END CATCH
 GO
@@ -152,7 +154,7 @@ BEGIN
 	END TRY
 	BEGIN CATCH
 	
-		SELECT 'Cannot access ' + @servername + ': ' + ERROR_MESSAGE()
+		SELECT 'Cannot access ' + @servername + ': ' + ERROR_MESSAGE() AS CaughtErrorMessage
 
 	END CATCH
 

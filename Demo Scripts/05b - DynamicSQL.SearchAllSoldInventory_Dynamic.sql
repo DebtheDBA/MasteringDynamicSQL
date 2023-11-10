@@ -2,26 +2,26 @@ USE AutoDealershipDemo
 GO
 
 CREATE OR ALTER PROCEDURE DynamicSQL.SearchAllSoldInventory_Dynamic (
-	@MakeName varchar(50) = NULL, --'Toyota',
-	@ModelName varchar(50) = NULL, --'RAV4',
-	@ColorName varchar(50) = NULL, --'Black',
-	@PackageName varchar(50) = NULL, --'Special Edition',
-	@InvoicePriceMin money = NULL, --,
-	@InvoicePriceMax money = NULL, --,
-	@MSRPMin money = NULL, --,
-	@MSRPMax money = NULL, --,
-	@SellPriceMin money = NULL, --,
-	@SellPriceMax money = NULL, --,
-	@DateReceivedMin date = NULL, --'2020-01-01',
-	@DateReceivedMax date = NULL, --'2021-12-01',
-	@TransactionDateMin datetime = NULL, --'2021-01-01',
-	@TransactionDateMax datetime = NULL, --'2023-01-01',
-	@Debug bit = 0
+	@MakeName VARCHAR(50) = NULL, --'Toyota',
+	@ModelName VARCHAR(50) = NULL, --'RAV4',
+	@ColorName VARCHAR(50) = NULL, --'Black',
+	@PackageName VARCHAR(50) = NULL, --'Special Edition',
+	@InvoicePriceMin MONEY = NULL, --,
+	@InvoicePriceMax MONEY = NULL, --,
+	@MSRPMin MONEY = NULL, --,
+	@MSRPMax MONEY = NULL, --,
+	@SellPriceMin MONEY = NULL, --,
+	@SellPriceMax MONEY = NULL, --,
+	@DateReceivedMin DATE = NULL, --'2020-01-01',
+	@DateReceivedMax DATE = NULL, --'2021-12-01',
+	@TransactionDateMin DATETIME = NULL, --'2021-01-01',
+	@TransactionDateMax DATETIME = NULL, --'2023-01-01',
+	@Debug BIT = 0
 )
 AS
 BEGIN
 
-DECLARE @SQL nvarchar(max),
+DECLARE @SQL NVARCHAR(MAX),
 	@ParmDefinition NVARCHAR(500);  
 
 /* get the list of parameters */
@@ -59,39 +59,39 @@ SELECT  /* SearchAllSoldInventory_DynamicNoDefaults */
 		/* Create a constant to make it easier to add things later on. */
 		1 = 1 '
 	+ CASE WHEN NULLIF(@MakeName, '') IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND mk.MakeName = @MakeName'
+		ELSE CHAR(10) + CHAR(13) + 'AND mk.MakeName = @MakeName'
 	END 
 	+ CASE WHEN NULLIF(@ModelName, '') IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND ml.ModelName = @ModelName'
+		ELSE CHAR(10) + CHAR(13) + 'AND ml.ModelName = @ModelName'
 	END
 	+ CASE WHEN NULLIF(@ColorName, '') IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND clr.ColorName = @ColorName'
+		ELSE CHAR(10) + CHAR(13) + 'AND clr.ColorName = @ColorName'
 	END
 	+ CASE WHEN NULLIF(@PackageName, '') IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND pkg.PackageName = @PackageName'
+		ELSE CHAR(10) + CHAR(13) + 'AND pkg.PackageName = @PackageName'
 	END
 	+ CASE WHEN NULLIF(@InvoicePriceMin, 0) IS NULL AND @InvoicePriceMax IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND (
+		ELSE CHAR(10) + CHAR(13) + 'AND (
 		I.InvoicePrice BETWEEN COALESCE(@InvoicePriceMin, 1) AND COALESCE(@InvoicePriceMax, 999999)
 	)'
 		END
 	+ CASE WHEN NULLIF(@MSRPMin, 0) IS NULL AND @MSRPMax IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND (
+		ELSE CHAR(10) + CHAR(13) + 'AND (
 		I.MSRP BETWEEN COALESCE(@MSRPMin, 1) AND COALESCE(@MSRPMax, 999999)
 	)'
 		END
 	+ CASE WHEN NULLIF(@SellPriceMin, 0) IS NULL AND @SellPriceMax IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND (
+		ELSE CHAR(10) + CHAR(13) + 'AND (
 		sh.SellPrice BETWEEN COALESCE(@SellPriceMin, 1) AND COALESCE(@SellPriceMax, 999999)
 	)'
 		END
 	+ CASE WHEN NULLIF(@DateReceivedMin, '1900-01-01') IS NULL AND NULLIF(@DateReceivedMax, '2050-01-01') IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND (
+		ELSE CHAR(10) + CHAR(13) + 'AND (
 		I.DateReceived BETWEEN COALESCE(@DateReceivedMin, ''1900-01-01'') AND COALESCE(@DateReceivedMax, ''2050-01-01'')
 	)'
 		END
 	+ CASE WHEN NULLIF(@TransactionDateMin, '1900-01-01') IS NULL AND NULLIF(@TransactionDateMax, '2050-01-01') IS NULL THEN ''
-		ELSE char(10) + char(13) + 'AND (
+		ELSE CHAR(10) + CHAR(13) + 'AND (
 		sh.TransactionDate BETWEEN COALESCE(@TransactionDateMin, ''1900-01-01'') AND COALESCE(@TransactionDateMax, ''2050-01-01'')
 	)'
 		END

@@ -2,20 +2,20 @@ USE AutoDealershipDemo
 GO
 
 CREATE OR ALTER PROCEDURE DynamicSQL.SearchAllSoldInventory (
-	@MakeName varchar(50) = NULL, --'Toyota',
-	@ModelName varchar(50) = NULL, --'RAV4',
-	@ColorName varchar(50) = NULL, --'Black',
-	@PackageName varchar(50) = NULL, --'Special Edition',
-	@InvoicePriceMin money = NULL, --,
-	@InvoicePriceMax money = NULL, --,
-	@MSRPMin money = NULL, --,
-	@MSRPMax money = NULL, --,
-	@SellPriceMin money = NULL, --,
-	@SellPriceMax money = NULL, --,
-	@DateReceivedMin date = NULL, --'2020-01-01',
-	@DateReceivedMax date = NULL, --'2021-12-01',
-	@TransactionDateMin datetime = NULL, --'2021-01-01',
-	@TransactionDateMax datetime = NULL --'2023-01-01'
+	@MakeName VARCHAR(50) = NULL, --'Toyota',
+	@ModelName VARCHAR(50) = NULL, --'RAV4',
+	@ColorName VARCHAR(50) = NULL, --'Black',
+	@PackageName VARCHAR(50) = NULL, --'Special Edition',
+	@InvoicePriceMin MONEY = NULL, --,
+	@InvoicePriceMax MONEY = NULL, --,
+	@MSRPMin MONEY = NULL, --,
+	@MSRPMax MONEY = NULL, --,
+	@SellPriceMin MONEY = NULL, --,
+	@SellPriceMax MONEY = NULL, --,
+	@DateReceivedMin DATE = NULL, --'2020-01-01',
+	@DateReceivedMax DATE = NULL, --'2021-12-01',
+	@TransactionDateMin DATETIME = NULL, --'2021-01-01',
+	@TransactionDateMax DATETIME = NULL --'2023-01-01'
 )
 AS
 BEGIN

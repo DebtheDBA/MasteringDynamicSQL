@@ -1,9 +1,6 @@
-/* Mastering Dynamic SQL Demos
-
-Confirm database is SQL 2022 compat
-and run sp_updatestats and turn on Query Store
-
-*/
+/*******************************/
+/* Mastering Dynamic SQL Demos */
+/*******************************/
 
 USE AutoDealershipDemo
 GO
@@ -20,6 +17,11 @@ WHY?
 	"On 64-bit servers, the size of the string is limited to 2 GB, the maximum size of nvarchar(max)."
 
 */
+
+
+
+
+
 
 /* EXEC vs. sp_executesql */
 
@@ -51,12 +53,13 @@ DECLARE @SQL nvarchar(max),
 	@Table sysname = 'Inventory'
 
 -- This won't run. Don't bother....
--- SELECT top 10 * FROM @Table
+--SELECT top 10 * FROM @Table
 
 -- One option for writing this using EXEC 
 --EXEC ('SELECT top 10 * FROM ' + @table)
 
 SELECT @SQL = N'SELECT TOP 10 * FROM ' + @table
+PRINT @SQL
 
 EXEC (@SQL)
 
@@ -70,10 +73,10 @@ GO
 *********************************/
 
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory; SELECT ''NYC, We have a problem.'''
+	@Table sysname = 'Inventory; SELECT ''PASS Summit, We have a problem.'' as Injection'
 	
 SELECT @SQL = N'SELECT TOP 10 * FROM ' + @table
-SELECT @SQL
+PRINT @SQL
 
 EXEC (@SQL)
 
@@ -84,7 +87,7 @@ GO
 /* Now let's try to break this */
 -- Let's solve this by using square brackets
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory] ; SELECT ''NYC, We have a problem.'' as [I can still do this:'
+	@Table sysname = 'Inventory] ; SELECT ''PASS Summit, We have a problem.'' as [I can still do this:'
 
 
 SELECT @SQL = N'SELECT TOP 10 * FROM [' + @table + ']'
@@ -96,9 +99,9 @@ EXEC sp_executesql @SQL
 GO
 
 
--- use quotename for objects!!!
+-- use QUOTENAME for objects!!!
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory]; SELECT ''NYC, We have a problem.'' as [I can still do this:;'
+	@Table sysname = 'Inventory]; SELECT ''PASS Summit, We have a problem.'' as [I can still do this:;'
 
 SELECT @SQL = N'SELECT TOP 10 * FROM ' + QUOTENAME(@table)
 PRINT @SQL
@@ -109,6 +112,7 @@ EXEC sp_executesql @SQL
 GO
 
 -- Try other varieties to break this. It's harder to do, so have fun!
+
 
 /************************* 
  Relationship of Dynamic SQL to the batch it's running in 
@@ -233,6 +237,104 @@ SELECT @SQL = N'SELECT @TotalCount = count(*) FROM Inventory WHERE BaseModelID =
 EXEC sp_executesql @SQL, N'@BaseModelID int, @TotalCount int OUTPUT', @BaseModelID, @TotalCount OUTPUT
 
 SELECT @TotalCount
+
+
+/************************* 
+ What happens if you change the database inside the dynamic SQL statement?
+*************************/
+
+SELECT DB_NAME() AS Before_DB
+
+EXEC sp_executesql N'
+USE Superheroes;
+
+SELECT DB_NAME() as DynamicSQLDB
+'
+
+SELECT DB_NAME() AS After_DB
+
+/* as a side note, there are some things you can't do with Dynamic SQL*/
+EXEC sp_executesql N'
+USE Superheroes;
+GO
+
+SELECT DB_NAME() as DynamicSQLDB
+'
+
+/************************* 
+ What does this mean for transactions ?
+*************************/
+
+-- create transaction outside dynamic sql
+-- does it show inside the statement?
+-- run individually
+
+BEGIN TRAN TransactionOutside
+
+SELECT TOP 10 * FROM dbo.Inventory
+
+DBCC OPENTRAN
+EXEC sp_executesql N'DBCC OPENTRAN'
+
+
+SELECT * FROM sys.dm_tran_active_transactions
+EXEC sp_executesql N'SELECT * FROM sys.dm_tran_active_transactions'
+
+ROLLBACK TRAN TransactionOutside
+
+/*
+-- create transaction inside dynamic sql
+	-- once for the current database
+	-- once creating inside a different database
+	-- does it show outside the statement
+*/
+
+EXEC sp_executesql N'
+BEGIN TRAN TransactionInside
+
+SELECT TOP 10 * FROM dbo.Inventory
+
+ROLLBACK TRAN TransactionInside
+'
+
+DBCC OPENTRAN
+SELECT * FROM sys.dm_tran_active_transactions
+
+ROLLBACK TRAN TransactionInside
+
+
+
+/* 
+https://www.sommarskog.se/error_handling/Part2.html#nestedtransactions 
+*/
+
+SELECT @@TRANCOUNT AS OutsideTransaction, @@NESTLEVEL AS OutsideNestLevel
+
+EXEC sp_executesql N'
+SELECT @@TRANCOUNT InsideTransaction_Before, @@NESTLEVEL InsideNestLevel_Before
+
+BEGIN TRAN TransactionInside
+
+SELECT @@TRANCOUNT InsideTransaction, @@NESTLEVEL InsideNestLevel 
+
+ROLLBACK TRAN TransactionInside
+
+SELECT @@TRANCOUNT InsideTransaction_After, @@NESTLEVEL InsideNestLevel_After
+'
+GO
+
+--- does the same thing happen with EXEC(@SQL)?
+DECLARE @SQL NVARCHAR(MAX) = '
+SELECT @@TRANCOUNT InsideTransaction_Before, @@NESTLEVEL InsideNestLevel_Before
+
+BEGIN TRAN TransactionInside
+
+SELECT @@TRANCOUNT InsideTransaction, @@NESTLEVEL InsideNestLevel '
+
+EXEC (@SQL)
+
+ROLLBACK TRAN TransactionInside
+
 GO
 
 
