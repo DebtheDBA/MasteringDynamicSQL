@@ -294,7 +294,7 @@ BEGIN TRAN TransactionInside
 
 SELECT TOP 10 * FROM dbo.Inventory
 
-ROLLBACK TRAN TransactionInside
+--ROLLBACK TRAN TransactionInside
 '
 
 DBCC OPENTRAN

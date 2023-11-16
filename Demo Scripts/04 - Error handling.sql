@@ -99,9 +99,12 @@ BEGIN CATCH
 END CATCH
 GO
 
+-- go back and run previous statement INSERT ... EXEC 
+
+
 /* error when the database exists but the object doesn't */
 DECLARE @SQL nvarchar(max)
---CREATE TABLE #Person (Person_First_Name varchar(50), Person_Last_Name varchar(50))
+CREATE TABLE #Person (Person_First_Name varchar(50), Person_Last_Name varchar(50))
 
 BEGIN TRY 
 	SELECT @SQL = N'SELECT 

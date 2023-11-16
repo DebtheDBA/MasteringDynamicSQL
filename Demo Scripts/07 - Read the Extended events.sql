@@ -31,4 +31,4 @@ FROM
         CROSS APPLY
         ed.event_data.nodes( 'event' ) AS q(n)
 WHERE n.value( '(@timestamp)[1]', 'datetime2' ) > DATEADD(HOUR, -1, GETUTCDATE())
-
+--AND n.value( '(action[@name="session_id"]/value)[1]', 'bigint' ) = 84
