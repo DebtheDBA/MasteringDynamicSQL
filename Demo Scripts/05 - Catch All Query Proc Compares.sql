@@ -1,11 +1,38 @@
 /* Compare dynamic vs catch all versions
 
-Make sure to hit Ctrl + M first
+Make sure to hit Ctrl + M first to turn on Execution Plans
 */
+
 USE AutoDealershipDemo
 GO 
 
 SET STATISTICS IO ON
+
+-- Just look for one value
+EXEC DynamicSQL.SearchAllSoldInventory
+	@ColorName = 'Black';
+GO
+
+EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
+	@ColorName = 'Black',
+	@Debug = 1;
+GO
+
+
+-- Just look for a few values
+EXEC DynamicSQL.SearchAllSoldInventory
+	@ColorName = 'Blizzard',
+	@ModelName = 'RAV4';
+GO
+
+EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
+	@ColorName = 'Blizzard',
+	@ModelName = 'RAV4',
+	@Debug = 1;
+GO
+
+/*************************************************/
+/*** Additional examples if you are interested ***/
 
 -- Execute w. explicit values
 EXEC DynamicSQL.SearchAllSoldInventory
@@ -43,33 +70,10 @@ EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
 	@TransactionDateMax = '2023-01-01';
 GO
 
--- Execute for everything. Run these in a different window 
+-- Execute for everything. Run these 2 in a different window with query plan on
 EXEC DynamicSQL.SearchAllSoldInventory
 GO
 
 EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
-	@Debug = 1;
-GO
-
--- Just look for one value
-EXEC DynamicSQL.SearchAllSoldInventory
-	@ColorName = 'Black';
-GO
-
-EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
-	@ColorName = 'Black',
-	@Debug = 1;
-GO
-
-
--- Just look for a few value
-EXEC DynamicSQL.SearchAllSoldInventory
-	@ColorName = 'Blizzard',
-	@ModelName = 'RAV4';
-GO
-
-EXEC DynamicSQL.SearchAllSoldInventory_Dynamic
-	@ColorName = 'Blizzard',
-	@ModelName = 'RAV4',
 	@Debug = 1;
 GO

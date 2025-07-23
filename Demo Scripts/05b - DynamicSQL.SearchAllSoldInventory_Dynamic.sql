@@ -29,7 +29,7 @@ SELECT @ParmDefinition = ' @MakeName varchar(50), @ModelName varchar(50), @Color
 
 /* create the statement */
 SELECT @SQL = N'
-SELECT  /* SearchAllSoldInventory_DynamicNoDefaults */
+SELECT  /* SearchAllSoldInventory_Dynamic */
 		I.VIN,
 		mk.MakeName,
 		ml.ModelName,

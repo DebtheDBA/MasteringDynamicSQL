@@ -24,9 +24,9 @@ GO
 IF OBJECT_ID(N'DynamicSQL.UpgradeTestTable') IS NULL
 CREATE TABLE DynamicSQL.UpgradeTestTable
 	(
-	UpgradeTestID int IDENTITY(1,1) NOT NULL PRIMARY KEY CLUSTERED,
-	StaticColumn varchar(30) NULL,
-	DropThisColumn varchar(30) NULL
+	UpgradeTestID INT IDENTITY(1,1) NOT NULL PRIMARY KEY CLUSTERED,
+	StaticColumn VARCHAR(30) NULL,
+	DropThisColumn VARCHAR(30) NULL
 	)
 GO
 

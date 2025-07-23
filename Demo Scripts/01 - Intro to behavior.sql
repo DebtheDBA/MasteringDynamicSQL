@@ -11,10 +11,13 @@ GO
 
 WHY?
 1. sp_executesql parameter is Unicode so I want to match
-2. If I don't know the size of the query that's going to be built, I need to be able to handle all situations.
-	But this can be dangerous. If you know what size it's going to be, use that for safety's sake
+2. If I don't know the size of the query that's going to 
+	be built, I need to be able to handle all situations.
+	But this can be dangerous. If you know what size it's 
+	going to be, use that for safety's sake
 3. From the MS documentation:
-	"On 64-bit servers, the size of the string is limited to 2 GB, the maximum size of nvarchar(max)."
+	"On 64-bit servers, the size of the string is limited 
+	to 2 GB, the maximum size of nvarchar(max)."
 
 */
 
@@ -34,7 +37,8 @@ GO
 
 
 
--- no actual execution plans???? It's a select statement with a constant. So it checks
+-- no actual execution plans???? 
+-- It's a select statement with a constant. So it checks
 
 -- now let's get some execution plans
 
@@ -73,7 +77,7 @@ GO
 *********************************/
 
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory; SELECT ''PASS Summit, We have a problem.'' as Injection'
+	@Table sysname = 'Inventory; SELECT ''Boston, We have a problem.'' as Injection'
 	
 SELECT @SQL = N'SELECT TOP 10 * FROM ' + @table
 PRINT @SQL
@@ -84,10 +88,10 @@ EXEC sp_executesql @SQL
 GO
 
 
-/* Now let's try to break this */
 -- Let's solve this by using square brackets
+/* Now let's try to break this */
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory] ; SELECT ''PASS Summit, We have a problem.'' as [I can still do this:'
+	@Table sysname = 'Inventory] ; SELECT ''Boston, We have a problem.'' as [I can still do this:'
 
 
 SELECT @SQL = N'SELECT TOP 10 * FROM [' + @table + ']'
@@ -101,7 +105,7 @@ GO
 
 -- use QUOTENAME for objects!!!
 DECLARE @SQL nvarchar(max),
-	@Table sysname = 'Inventory]; SELECT ''PASS Summit, We have a problem.'' as [I can still do this:;'
+	@Table sysname = 'Inventory]; SELECT ''Boston, We have a problem.'' as [I can still do this:;'
 
 SELECT @SQL = N'SELECT TOP 10 * FROM ' + QUOTENAME(@table)
 PRINT @SQL
@@ -190,7 +194,6 @@ EXEC sp_executesql @SQL, N'@BaseModelID int', @BaseModelID
 GO
 
 -- Multiple Parameters
-
 DECLARE @SQL nvarchar(max),
 	@BaseModelID int = 58,
 	@PackageID int = 4
@@ -205,6 +208,28 @@ SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID 
 EXEC sp_executesql @SQL, N'@BaseModelID int, @PackageID int', @BaseModelID, @PackageID
 
 GO
+
+-- Parameters passed to the query don't have to match the inside parameter names
+DECLARE @SQL nvarchar(max),
+	@New_Base_Model_ID int = 58,
+	@New_Package_ID int = 4
+
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID AND PackageID = @PackageID'
+EXEC sp_executesql @SQL, N'@BaseModelID int, @PackageID int', @New_Base_Model_ID, @New_Package_ID
+
+GO
+
+-- but the order still matters
+DECLARE @SQL nvarchar(max),
+	@New_Base_Model_ID int = 58,
+	@New_Package_ID int = 4
+
+SELECT @SQL = N'SELECT TOP 10 * FROM Inventory WHERE BaseModelID = @BaseModelID AND PackageID = @PackageID
+SELECT @BaseModelID as BaseModelValue, @PackageID as PackageValue'
+EXEC sp_executesql @SQL, N'@BaseModelID int, @PackageID int', @New_Package_ID, @New_Base_Model_ID
+
+GO
+
 
 
 -- Output parameters
@@ -273,12 +298,8 @@ BEGIN TRAN TransactionOutside
 
 SELECT TOP 10 * FROM dbo.Inventory
 
-DBCC OPENTRAN
-EXEC sp_executesql N'DBCC OPENTRAN'
-
-
-SELECT * FROM sys.dm_tran_active_transactions
-EXEC sp_executesql N'SELECT * FROM sys.dm_tran_active_transactions'
+SELECT * FROM sys.dm_tran_active_transactions WHERE name = 'TransactionOutside'
+EXEC sp_executesql N'SELECT * FROM sys.dm_tran_active_transactions  WHERE name = ''TransactionOutside'''
 
 ROLLBACK TRAN TransactionOutside
 
@@ -297,8 +318,8 @@ SELECT TOP 10 * FROM dbo.Inventory
 --ROLLBACK TRAN TransactionInside
 '
 
-DBCC OPENTRAN
 SELECT * FROM sys.dm_tran_active_transactions
+WHERE name = 'TransactionInside'
 
 ROLLBACK TRAN TransactionInside
 
@@ -327,9 +348,9 @@ GO
 DECLARE @SQL NVARCHAR(MAX) = '
 SELECT @@TRANCOUNT InsideTransaction_Before, @@NESTLEVEL InsideNestLevel_Before
 
-BEGIN TRAN TransactionInside
+--BEGIN TRAN TransactionInside
 
-SELECT @@TRANCOUNT InsideTransaction, @@NESTLEVEL InsideNestLevel '
+--SELECT @@TRANCOUNT InsideTransaction, @@NESTLEVEL InsideNestLevel '
 
 EXEC (@SQL)
 

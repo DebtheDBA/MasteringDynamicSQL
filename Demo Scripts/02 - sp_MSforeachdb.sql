@@ -8,7 +8,18 @@ Same queries, different targets:
 Find the select table objects for each database on the server that are not the master database. 
 *******************************************/
 
-/* Use regular Dynamic SQL. Can run twice - once using sp_executesql and once using EXEC(@SQL) */
+/* Use sp_MSforeachdb */
+EXEC sp_MSforeachdb '
+USE ?
+
+IF db_id() >= 5
+/* sp_MSforeachdb */
+SELECT TOP 10 db_id() as DatabaseID, db_name() as DatabaseName, * FROM INFORMATION_SCHEMA.TABLES
+'
+GO
+
+/* Use regular Dynamic SQL. 
+Can run twice - once using sp_executesql and once using EXEC(@SQL) */
 
 DECLARE @SQL NVARCHAR(MAX),
 	@dbname NVARCHAR(128)
@@ -42,12 +53,3 @@ DEALLOCATE table_cursor
 GO
 
 
-/* Use sp_MSforeachdb */
-EXEC sp_MSforeachdb '
-USE ?
-
-IF db_id() >= 5
-/* sp_MSforeachdb */
-SELECT TOP 10 db_id() as DatabaseID, db_name() as DatabaseName, * FROM INFORMATION_SCHEMA.TABLES
-'
-GO
